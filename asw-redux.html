@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>WSA - Redux Seminar</title>
+
+    <meta name="description" content="Redux is a predictable state container for javascript apps.">
+    <meta name="author" content="Giacomo Mantani">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/moon.css" id="theme">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/tomorrow-night.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <div class="slides">
+        <section>
+          <h1>Redux</h1>
+          <h3><span class="highlight-text">W</span>eb <span
+              class="highlight-text">S</span>ervices and <span class="highlight-text">A</span>pplications</h3>
+          <h4>Seminar</h4>
+          <p><small>Created by <a href="http://jake.anapnea.net">Giacomo Mantani</a></small>
+          </p>
+        </section>
+
+        <section>
+          <section>
+            <h2>Introduction</h2>
+            <p>Redux is a predictable state container for <b>javascript</b> apps.
+
+            It helps you write applications that behave consistently and are easy to test.
+
+            <blockquote cite="https://youtu.be/xsSnOQynTHs">
+              &ldquo;My goal was to create a state management library with minimal API but completely
+              predictable behavior, so it is possible to implement logging, hot reloading,
+              time travel, universal apps, record and replay, without any buy-in from the
+              developer.&rdquo; - Dan Abramov
+            </blockquote>
+            </p>
+            <aside class="notes">
+              <p>I Containers sono una soluzione al problema di come far girare in
+              maniera affidabile un software in maniera indipendente dall'
+              ambiente (environment).  Es, docker</p>
+
+              <p>E' un runtime environment completo.</p>
+            </aside>
+          </section>
+          <section>
+            <h3>Motivation</h3>
+            <h4>Live React: Hot Reloading with Time Travel at react-europe 4015</h4>
+            <iframe width="560" height="315"
+            src="https://www.youtube.com/embed/xsSnOQynTHs" frameborder="0"
+            allowfullscreen></iframe>
+            <p><q cite="https://youtu.be/xsSnOQynTHs">&ldquo;Before optimize your
+              app, optimize your work flow&rdquo; - Dan Abramov  </q>
+            </p>
+          </section>
+          <section>
+            <h4>The mess we're in</h4>
+
+            <p>Our code must manage more state than ever before.</p>
+
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/lKXe3HUG2l4" frameborder="0" allowfullscreen></iframe>
+
+            <blockquote cite="https://www.youtube.com/embed/lKXe3HUG2l4">&ldquo;
+              The number of states that 3 variables in javascript could have is
+              greater than the total number of atoms on the planet.
+              &rdquo;</q>
+            </blockquote>
+
+            <aside class="notes">
+              <p>Un video molto interessante e divertente, non e' correlato con
+              redux ma fa capire bene le motivazioni che ci stanno
+              dietro.</p><br>
+              <p>Dovro' essere sincero penso che Joe Armstrong scherzasse ma non
+              ci metterei la mano sul fuoco.</p>
+            </aside>
+          </section>
+          <section>
+            <h3> Mutation + asynchronicity = Complexity.</h3>
+
+            <p>Libraries like <a href="https://facebook.github.io/react/"
+              target="_blank">React</a> attempt to solve this problem in the
+            view layer by removing both asynchrony and direct DOM manipulation.
+            However, managing the state of your data is left up to you. This is
+            where Redux enters.
+            </p>
+            <aside class="notes">
+              <p>Se un modello puo' aggiornare un altro modello, una view puo'
+              aggiornare un modello che a sua volta aggiorna un altro modello e
+              cosi via, a un certo si perde la concezione di quello che e'
+              capitato, del controllo su quando perche' e come si e' arrivati ad
+              un certo stato.</p>
+              <p>Dan chiama le mutazioni e l'asincronia coca-cola e mentos,
+              separati vanno bene ma insieme possono essere difficili da
+              trattare.</p>
+            </aside>
+          </section>
+          <section>
+            <h3>Footnote</h3>
+
+            <ul>
+              <li>You can use Redux together with React, or with any other view
+              library</li>
+              <li>It is tiny (2kB, including dependencies)</li>
+            </ul>
+
+            <aside class="notes">
+              <p>Ovviamente Redux ha gia' dei moduli per incorporarlo con React
+              ed altre librerie per gesire le view.</p>
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Redux evolves the ideas of <a
+                href="https://facebook.github.io/flux/" target="_blank">Flux...</a></h2>
+
+            <blockquote cite="https://facebook.github.io/flux/">
+              &ldquo;Flux is the application architecture that Facebook uses for building
+              client-side web applications. It complements React's composable
+              view components by utilizing a unidirectional data flow. It's more
+              of a pattern rather than a formal framework.&rdquo;
+            </blockquote>
+
+            <aside class="notes">
+              <p>Senza andare nel dettaglio ve ne parlera' poi meglio Michele Rossi...
+              Flux e' un architettura sviluppata internamente da facebook per
+              costruire applicazioni web client-side. Complementa le view
+              componibili di React utilizzando un data flow unidirezionale. E'
+              molto pragmatico, si puo' vedere come un patter di programmazione
+              piu' che ne un vero e proprio framework.</p>
+            </aside>
+          </section>
+          <section>
+            <h3>...but avoids its complexity by taking cues from <a
+                href="http://elm-lang.org/" target="_blank">Elm</a></h3>
+
+            <blockquote cite="https://github.com/evancz/elm-architecture-tutorial">
+              &ldquo;Elm is a functional programming language <span
+                class="highlight-text">haskell</span>-based for
+              writing applications in your browser. The Elm Architecture is a
+              simple pattern for infinitely nestable components. It is great for
+              modularity, code reuse, and testing.&rdquo;
+            </blockquote>
+
+            <aside class="notes">
+              <p>Anche qui non andremo nel dettaglio ma era opportuno vedere
+              come fondamenta di programmazione funzionale abbiano pervaso
+              interamente Redux e la sua filosofia di sviluppo. Chi ha fatto
+              gia' PAeP aveva sicuramente immaginato dalla descrizione iniziale
+              un collegamento con il paradigma funzionale.</p>
+            </aside>
+          </section>
+          <section>
+            <h3>Footnode</h3>
+            <p>Whether you have used them or not, Redux only takes a few minutes
+            to get started with.</p>
+
+            <aside class="notes">
+              <p>Per chi non conoscesse le tecnlogie citate non si preoccupi.
+              Non e' necessario conoscerle per utilizzare Redux, anche se come
+              vedremo l' immutabilita' ed altre proprieta' della programmazione
+              funzionale bisogna tenerle a mente.</p>
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Getting started</h2>
+            <p>You could use Redux like a collection of modules:</p>
+            <ul>
+              <li><a href="http://www.commonjs.org/" target="_blank">CommonJS</a></li>
+              <li><a href="https://webpack.github.io/docs/" target="_blank">Webpack</a></li>
+              <li><a href="http://browserify.org/" target="_blank">Browserify</a></li>
+              <li>Directly with <a href="https://nodejs.org/en/"
+                target="_blank">NodeJS</a></li>
+              <li><a href="http://rollupjs.org/" target="_blank">Rollup</a> (Have a look!)</li>
+              <li>Inside directory <em>dist</em> there is also the <b>Universal
+                Module Definition</b>, that you can use with a <b><em>&lt;script&gt;</em></b>
+              tag</li>
+              <li><a href="http://bower.io/" target="_blank">Bower</a></li>
+            </ul>
+
+            <aside class="notes">
+              <p>Non so cosa usiate personalmente ma si puo' usare praticamente
+              in ogni ambiente di sviluppo.</p>
+            </aside>
+          </section>
+          <section>
+            <h3>❤ Shell Commands ❤</h3>
+            <pre><code>npm install --save redux
+npm install --save react-redux
+npm install --save-dev redux-devtools</code></pre>
+
+            <aside class="notes">
+              <p>Vorrei farvi notare oltre a react-redux che da come si capisce
+              gia' dal nome e' il modulo per usare insieme redux e react, il
+              modulo redux-devtools. Ci sono poi i riferimenti alla fine ma se
+              pensate di provare a sviluppare con redux e' davvero da prendere
+              in considerazione.</p>
+            </aside>
+          </section>
+          <section>
+            <h3> NPM vs Bower  </h3>
+            <p>Both are <u>dependency managers</u> but with very different purposes.</p>
+
+            <p><span class="highlight-text"> Npm </span>was created to install modules used in a <a href="https://nodejs.org/en/"
+              target="_blank">NodeJS</a> environment, or development tools such Karma,
+            lint, minifiers and so on. </p>
+
+            <p><span class="highlight-text"> Bower</span> was created to manage your frontend
+            dependencies. Libraries like jQuery, AngularJS, underscore, etc.</p>
+
+            <aside class="notes">
+              <p>Questa slide era soprattutto per me, non sapendo bene la
+              differenza che c'era tra npm e bower mi son un po informato ed ho
+              pensato che potesse essere utile a qualcun altro.</p>
+            </aside>
+          </section>
+        </section>
+
+        <section>
+
+          <section>
+            <h2>Lets start</h2>
+          </section>
+
+          <section>
+            <h3>State</h3>
+
+            <p>By convention, the top-level state is an object or some other
+            key-value collection like a Map, but technically it can be any type.
+            Still, you should do your best to keep the state serializable. Don’t
+            put anything inside it that you can’t easily turn into JSON.
+            </p>
+
+            <p>The single state value that is managed by the store and returned
+            by</p>
+            <pre><code>store.getState()</code></pre> <p>It represents the entire state of a Redux application,
+            which is often a deeply nested object.
+            </p>
+
+            <aside class="notes">
+              <p>Lo stato e' codificato come un oggetto o una collezione
+              chiave-valore. Ma tecnicamente puo' essere di ogni tipo. Con tipo,
+              mi riferisco ai tipi indicati da Flow. Flow e' un type checker
+              (statico) ho messo i riferimenti in fondo alle slide, trovate i
+              tipi nella documentazione quick-reference.
+              </p>
+              <p>Ovviamente deve essere serializzabile perche' abbiamo detto
+              essere come un container che potrebbe venire spostato e
+              riutilizzato.</p>
+            </aside>
+          </section>
+
+          <section>
+            <h3>Actions</h3>
+            <p>The only way to change the state tree is to emit an <span class="highlight-text">action</span>, an
+            object describing what happened. An intent to <em>mutate</em>. This ensures
+            that neither the views nor the network callbacks will ever write
+            directly to the state. </p>
+            <p class="fragment">Because all <em>mutations</em> are centralized and
+            happen one by one in a strict order, there are no subtle race
+            conditions to watch out for. As actions are just plain objects,
+            they can be logged, serialized, stored, and later replayed for
+            debugging or testing purposes.
+            </p>
+
+            <p class="fragment">Actions are plain javascript objects. Actions <u>must have</u> a type property that
+            indicates the type of action being performed. Types should typically be defined
+            as string constants.
+            </p>
+
+            <aside class="notes">
+              <p>Ecco che vediamo un altro degli aspetti tipici della
+              programmazione funzionale. Il fatto che l'unico modo per cambiare
+              uno stato sia tramite l'emissione di un'azione, permette di
+              mantenere coerenza.
+
+              Un azione potrebbe avere informazioni aggiuntive oltre al tipo. La
+              struttura di un azione e' infatti completamente a carico dello
+              sviluppatore. Se siete interessati a pattern su come costruire le
+              azione date poi un occhiata allo standard Flux, sempre nei
+              riferimenti alla fine delle slide.</p>
+            </aside>
+          </section>
+
+          <section>
+            <pre><code class="javascript">/*
+ * action types
+ */
+
+export const ADD_TODO = 'ADD_TODO'
+export const COMPLETE_TODO = 'COMPLETE_TODO'
+export const SET_VISIBILITY_FILTER = 'SET_VISIBILITY_FILTER'
+
+/*
+ * other constants
+ */
+
+export const VisibilityFilters = {
+  SHOW_ALL: 'SHOW_ALL',
+  SHOW_COMPLETED: 'SHOW_COMPLETED',
+  SHOW_ACTIVE: 'SHOW_ACTIVE'
+}
+
+/*
+ * action creators
+ */
+
+export function addTodo(text) {
+  return { type: ADD_TODO, text }
+}
+
+export function completeTodo(index) {
+  return { type: COMPLETE_TODO, index }
+}
+
+export function setVisibilityFilter(filter) {
+  return { type: SET_VISIBILITY_FILTER, filter }
+}</code></pre>
+
+            <aside class="notes">
+              <p>Molti di voi avranno notato che uso lo standard ES6, Dan lo
+              consiglia. Lo zucchero sintattico permette di avere il codice
+              molto piu' pulito e per gli esempi che dovevo fare va piu' che
+              bene. Ovviamente e' retro-compatibile ed esiste la sintassi per
+              ES5 senza bisogno di un traduttore come Babel (per chi non
+              conoscesse Babel, ci dia un occhiata, per progetti contenuti e'
+              molto utile).</p>
+            </aside>
+
+          </section>
+          <section>
+            <h3>Reducers</h3>
+            <p>To specify how the actions transform the state tree, you write
+            pure <span class="highlight-text">reducers</span>.</p>
+
+            <p>Given the same arguments, it should calculate the next state and
+            return it.</p><p class="fragment grow">No surprises. No side effects. No API calls. No
+              mutations. Just a calculation.</p>
+          </section>
+          <section>
+            <pre><code class="javascript">import { combineReducers } from 'redux'
+import { ADD_TODO, COMPLETE_TODO, SET_VISIBILITY_FILTER, VisibilityFilters } from './actions'
+const { SHOW_ALL } = VisibilityFilters
+
+// Filter reducer
+function visibilityFilter(state = SHOW_ALL, action) {
+  switch (action.type) {
+    case SET_VISIBILITY_FILTER:
+      return action.filter
+    default:
+      return state
+  }
+}
+
+// Main reducer
+function todos(state = [], action) {
+  switch (action.type) {
+    case ADD_TODO:
+      return [
+        ...state,
+        {
+          text: action.text,
+          completed: false
+        }
+      ]
+    case COMPLETE_TODO:
+      return state.map((todo, index) =&gt; {
+        if (index === action.index) {
+          return Object.assign({}, todo, {
+            completed: true
+          })
+        }
+        return todo
+      })
+    default:
+      return state
+  }
+}
+
+export default function todoApp(state = {}, action) {
+  return {
+    visibilityFilter: visibilityFilter(state.visibilityFilter, action),
+    todos: todos(state.todos, action)
+  }
+}</code></pre>
+          </section>
+          <section>
+            <h3>Store</h3>
+            <p>The state of your whole application is stored in an object tree
+            within a single <span class="highlight-text">store</span>. It is
+            the object that brings actions and reducers
+            together.</p>
+
+            <p>The store has the following responsibilities:</p>
+
+            <ul>
+              <li class="fragment shrink">Holds application state</li>
+              <li class="fragment shrink">Allows access to state via <i>getState()</i></li>
+              <li class="fragment shrink">Allows state to be updated via <i>dispatch(action)</i></li>
+              <li class="fragment shrink">Registers listeners via <i>subscribe(listener)</i></li>
+              <li class="fragment shrink">Handles unregistering of listeners via the function returned by
+              <i>subscribe(listener)</i>.</li>
+            </ul>
+            </p>
+          </section>
+          <section>
+            <pre><code class="javascript">import { createStore } from 'redux'
+import todoApp from './reducers'
+
+let store = createStore(todoApp)</code></pre>
+          </section>
+          <section>
+            <pre><code class="javascript">import { addTodo, completeTodo, setVisibilityFilter, VisibilityFilters } from './actions'
+
+// Log the initial state
+console.log(store.getState())
+
+// Every time the state changes, log it
+// Note that subscribe() returns a function for unregistering the listener
+let unsubscribe = store.subscribe(() =&gt;
+  console.log(store.getState())
+)
+
+// Dispatch some actions
+store.dispatch(addTodo('Learn about actions'))
+store.dispatch(addTodo('Learn about reducers'))
+store.dispatch(addTodo('Learn about store'))
+store.dispatch(completeTodo(0))
+store.dispatch(completeTodo(1))
+store.dispatch(setVisibilityFilter(VisibilityFilters.SHOW_COMPLETED))
+
+// Stop listening to state updates
+unsubscribe()</code></pre>
+          </section>
+          <section>
+            <h3>Complete example</h3>
+            <p><a href="http://redux.js.org/docs/basics/ExampleTodoList.html"
+              target="_blank">http://redux.js.org/docs/basics/ExampleTodoList.html</a></p>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Final Thoughts</h2>
+            <p>This architecture might seems like an overkill for a todos app, but
+            the beauty of this pattern is how well it scales to large and complex
+            apps. It also enables very powerful <a
+              href="https://github.com/gaearon/redux-devtools" target="_blank">developer tools</a>, because it is
+            possible to trace every mutation to the action that caused it. You can
+            record user sessions and reproduce them just by replaying every
+            action.</p>
+          </section>
+          <section>
+            <h3>You could also vandalize your GitHub :D</h3>
+          </section>
+        </section>
+
+        <section style="text-align: left;">
+          <h1>THE END</h1>
+          <h2>Resources</h2>
+          <p>
+          - <a href="http://redux.js.org/docs/">Official docs (gitbook)</a> <br>
+          - <a href="https://egghead.io/lessons/javascript-redux-the-single-immutable-state-tree">30 video lessons about redux from his father</a> <br>
+          - <a href="https://code-cartoons.com/a-cartoon-intro-to-redux-3afb775501a6#.3sn7jyone">A cartoon guide about redux</a> <br>
+          - <a href="https://code-cartoons.com/a-cartoon-guide-to-flux-6157355ab207">A cartoon guide about flux (requirement)</a> <br>
+          - <a href="https://github.com/acdlite/flux-standard-action">Flux Standard Actions</a> <br>
+          - <a href="http://flowtype.org/">Flow, static type checker for JavaScript</a>
+          </p>
+        </section>
+
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+
+// More info https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+controls: true,
+progress: true,
+history: true,
+center: true,
+
+transition: 'convex', // none/fade/slide/convex/concave/zoom
+
+// More info https://github.com/hakimel/reveal.js#dependencies
+dependencies: [
+{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+{ src: 'plugin/zoom-js/zoom.js', async: true },
+{ src: 'plugin/notes/notes.js', async: true }
+]
+});
+
+    </script>
+
+    </body>
+    </html>
